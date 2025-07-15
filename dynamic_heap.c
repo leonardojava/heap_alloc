@@ -5,6 +5,8 @@
 #define PAGE_SIZE 4096
 #define ALIGNMENT 8
 #define ALIGN(size) (((size) + (ALIGNMENT - 1)) & ~(ALIGNMENT - 1))
+#define valloc_size 640000
+
 typedef struct Heap_Chunk{
     void* start;
     size_t size;
@@ -113,14 +115,14 @@ void* heap_alloc(size_t size){
         }
         curr = curr->next;
     }
-    void *ptr = VirtualAlloc(NULL, 640000, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+    void *ptr = VirtualAlloc(NULL, valloc_size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
     if(!ptr){
         printf("heap expansion failed");
         return NULL;
     }
     Heap_Chunk* region = (Heap_Chunk*)ptr;
     region->start = (char*)ptr + sizeof(Heap_Chunk);
-    region->size = 640000 - sizeof(Heap_Chunk);
+    region->size = valloc_size - sizeof(Heap_Chunk);
     region->prev = NULL;
     region->next = NULL;
     insert_chunk(&heap_freed, region);
